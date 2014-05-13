@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "dude welcome"
 OPTIND=1
 
@@ -53,10 +52,8 @@ wpcfg() {
 		if [[ $verbose == 'true' ]]; then echo "Manual mode"; fi
 		read -p "db user pass [host]" dbname_new dbuser_new dbpass_new dbhost_new
 		if [[ $verbose == 'true' ]]; then echo -e "You entered: \nDB: $dbname_new \nUser: $dbuser_new \nPass: $dbpass_new \nHost: $dbhost_new"; fi
-		if [[ -z $dbpass_new ]]; then 
-			echo "Incomplete data set"
-			break
-		fi
+
+		# If the 4th argument isn't passed (dbhost_new), just set it to 'localhost'
 		if [[ -z $dbhost_new ]]; then
 			if [[ $verbose == 'true' ]]; then echo "dbhost_new was empty, setting as 'localhost'"; fi
 			dbhost_new='localhost'
@@ -71,13 +68,17 @@ wpcfg() {
 
 	fi
 
-	
 
-	# The magic happens (replacing things)
-	sed -e "s|DB_NAME\(['\"]\),\s*\?\(['\"]\)${dbname_old}|DB_NAME\1, \2${dbname_new}|;
-	s|DB_USER\(['\"]\),\s*\?\(['\"]\)${dbuser_old}|DB_USER\1, \2${dbuser_new}|;
-	s|DB_PASSWORD\(['\"]\),\s*\?\(['\"]\)${dbpass_old}|DB_PASSWORD\1, \2${dbpass_new}|;
-	s|DB_HOST\(['\"]\),\s*\?\(['\"]\)${dbhost_old}|DB_HOST\1, \2${dbhost_new}|" wp-config_whatevahbackup_.php > newfile.txt
+	if [[ -z $dbpass_new ]]; then
+		echo "no dbpass_new"
+		wpcfg_fail		
+	else
+		# The magic happens (replacing things)
+		sed -e "s|DB_NAME\(['\"]\),\s*\?\(['\"]\)${dbname_old}|DB_NAME\1, \2${dbname_new}|;
+		s|DB_USER\(['\"]\),\s*\?\(['\"]\)${dbuser_old}|DB_USER\1, \2${dbuser_new}|;
+		s|DB_PASSWORD\(['\"]\),\s*\?\(['\"]\)${dbpass_old}|DB_PASSWORD\1, \2${dbpass_new}|;
+		s|DB_HOST\(['\"]\),\s*\?\(['\"]\)${dbhost_old}|DB_HOST\1, \2${dbhost_new}|" wp-config_whatevahbackup_.php > newfile.txt
+	fi
 
 # DB_USER\1, \1${dbuser_new}
 	# for getting only those lines that don't start with comments...  /^\//! 
@@ -90,7 +91,12 @@ wpcfg() {
 
 
 }
+echo "broken3"
 
+wpcfg_fail() {
+
+	echo "failed"
+}
 
 
 
