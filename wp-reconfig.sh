@@ -8,8 +8,6 @@ wpcfg() {
 	mode='auto'
 
 	while getopts ":amcvh" opt; do
-		
-
 		case $opt in
 			a)
 				mode='auto';
@@ -27,8 +25,6 @@ wpcfg() {
 				mode='help';
 				;;
 		esac
-		
-
 	done
 	shift $((OPTIND-1))
 	OPTIND=1
@@ -39,13 +35,12 @@ wpcfg() {
 	read -r dbhost_old dbname_old dbpass_old dbuser_old <<< $( egrep "^[^/].*['\"]DB_(NAME|USER|PASSWORD|HOST[^_])" wp-config_whatevahbackup_.php | sort -d | sed "s/.*[\"']\(.*\)[\"'].*;.*/\1/" )
 	echo "$dbhost_old $dbname_old $dbpass_old $dbuser_old"
 
-	# process at this point and create dbhost_new, dbname_new, etc. 
-
-
+	#new creds for testing
 	dbhost_new='localhostttttttttt'
 	dbname_new='new_db'
 	dbpass_new='somep@ssw0rd'
 	dbuser_new='new_user'
+	#new creds for testing
 
 
 	if [[ $mode == 'manual' ]]; then
@@ -70,8 +65,8 @@ wpcfg() {
 
 
 	if [[ -z $dbpass_new ]]; then
-		echo "no dbpass_new"
-		wpcfg_fail		
+		echo "no dbpass_new, exiting"
+	
 	else
 		# The magic happens (replacing things)
 		sed -e "s|DB_NAME\(['\"]\),\s*\?\(['\"]\)${dbname_old}|DB_NAME\1, \2${dbname_new}|;
