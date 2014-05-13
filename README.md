@@ -5,7 +5,7 @@ wp-reconfigure.sh
 Wanting to rebuild my wp-reconfigure but in bash so that I can more easily throw options/flags at it, etc. 
 
 ### Desired features:
-- [X] Ignore comments in wp-config.php
+- [x] Ignore comments in wp-config.php
 - [ ] Keep old password in auto mode (but if too short, just add some characters)
 - [ ] Keep old user in auto mode
 - [ ] Notify if any caching lines are present in wp-config.php
