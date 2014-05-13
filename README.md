@@ -5,12 +5,12 @@ wp-reconfigure.sh
 Wanting to rebuild my wp-reconfigure but in bash so that I can more easily throw options/flags at it, etc. 
 
 ### Desired features:
-- [ ] Ignore comments in wp-config.php
-- [ ] Keep old password (but if too short, just add some characters)
-- [ ] Keep old user
+- [X] Ignore comments in wp-config.php
+- [ ] Keep old password in auto mode (but if too short, just add some characters)
+- [ ] Keep old user in auto mode
 - [ ] Notify if any caching lines are present in wp-config.php
 - [ ] Notify if any WPMU lines are present
-- [ ] Spit out the site URL is, if those lines are present in wp-config.php
+- [ ] Spit out what the site URL is, if those lines are present in wp-config.php
 - [ ] Notify what the 'content folder' is (or if it's just not default)
 - [ ] Notify if debug mode is on?
 
@@ -33,7 +33,8 @@ Wanting to rebuild my wp-reconfigure but in bash so that I can more easily throw
  
 ### Roadmap:
 - v0.1: basic manual functionality
-
+- v0.2: basic auto functionality
 
 ### Release History:
-- v0.0: Something to start from
+- v0.0: Something to start fromi
+- v0.1: basic manual mode works
