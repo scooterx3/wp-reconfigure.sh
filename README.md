@@ -31,5 +31,9 @@ Wanting to rebuild my wp-reconfigure but in bash so that I can more easily throw
 - [ ] -v, --verbose
  -   Just what it says
  
+### Roadmap:
+- v0.1: basic manual functionality
 
 
+### Release History:
+- v0.0: Something to start from
