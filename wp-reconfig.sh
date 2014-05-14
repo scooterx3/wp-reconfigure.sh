@@ -6,7 +6,8 @@ wpcfg() {
 	# I want verbosity OFF and auto mode by default (even if no arguments are specified)
 	verbose=false
 	mode='auto'
-	random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)
+	random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
+	cpuser=`whoami`
 
 	dbhost_new=''
 	dbname_new=''
@@ -67,22 +68,44 @@ wpcfg() {
 		fi
 
 	elif [[ $mode == 'current' ]]; then
-		if [[ $verbose == 'true' ]]; then echo "Current mode running"; fi
+		[[ $verbose == 'true' ]] && echo "Current mode running"
 	elif [[ $mode == 'help' ]]; then
 		if [[ $verbose == 'true' ]]; then echo "Help mode running"; fi
 	else
+#AUTO
 		if [[ $verbose == 'true' ]]; then echo "Auto mode running"; fi
 		# this is auto mode
 
-		# take the old values (already retrieved) and modify them to fit.
-		# remove whatever is left of the first underscore (if any) and replace with cPanel username
-		# otherwise the old value becomes user_$dbname_old or user_$dbuser_old
+		# fix dbname
+		# if cPanel user is the same, keep it otherwise prefix whatever is there with cpuser_
+		if [[ $dbname_old == $cpuser"_*" ]]; then
+			dbname_new=$dbname_old
+		else
+			dbname_new=$cpuser"_"$dbname_old
+		fi
+
+		# fix username
+		# if cPanel user is the same, keep it otherwise prefix whatever is there with cpuser_
+		if [[ $dbuser_old == $cpuser"_*" ]]; then
+			dbuser_new=$dbuser_old
+			echo "true"
+		else
+			dbuser_new=$cpuser"_"$dbuser_old
+			echo "false"
+			echo "$cpuser"
+		fi
+
+		# making sure new dbuser isn't too long
+		if [[ ${#dbuser_new} > 16 ]]; then
+			if [[ verbose == 'true' ]]; then echo "dbuser_new too long, truncating"; fi
+			dbuser_new=${dbuser_new:0:16}
+		fi
 
 
 		# pass is different, just keep it unless it's shorter than 5. If so, add a random 5 to the end of the string. 
 		dbpass_old_size=${#dbpass_old}
 		if [[ $dbpass_old_size < 5 ]]; then 
-			if [[ $verbose == 'true' ]]; then echo "dbpass_old < 5 chars, adding random string"; fi 
+			if [[ $verbose == 'true' ]]; then echo "dbpass_old < 5 chars, adding random string: '$random_string'"; fi 
 			
 			dbpass_new=$dbpass_old$random_string #random_string defined at the top, I use it in more than 1 place
 			echo $dbpass_new
@@ -101,9 +124,9 @@ wpcfg() {
 	
 	else
 		# The magic happens (replacing things)
-		sed -e "s|DB_NAME\(['\"]\),\s*\?\(['\"]\)${dbname_old}|DB_NAME\1, \2${dbname_new}|;
-		s|DB_USER\(['\"]\),\s*\?\(['\"]\)${dbuser_old}|DB_USER\1, \2${dbuser_new}|;
-		s|DB_PASSWORD\(['\"]\),\s*\?\(['\"]\)${dbpass_old}|DB_PASSWORD\1, \2${dbpass_new}|;
+		sed -e "s|DB_NAME\(['\"]\),\s*\?\(['\"]\)${dbname_old}|DB_NAME\1, \2${dbname_new}|
+		s|DB_USER\(['\"]\),\s*\?\(['\"]\)${dbuser_old}|DB_USER\1, \2${dbuser_new}|
+		s|DB_PASSWORD\(['\"]\),\s*\?\(['\"]\)${dbpass_old}|DB_PASSWORD\1, \2${dbpass_new}|
 		s|DB_HOST\(['\"]\),\s*\?\(['\"]\)${dbhost_old}|DB_HOST\1, \2${dbhost_new}|" wp-config_whatevahbackup_.php > newfile.txt
 	fi
 
