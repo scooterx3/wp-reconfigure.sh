@@ -55,18 +55,19 @@ wpcfg() {
 #MANUAL
 		if [[ $verbose == 'true' ]]; then echo -e "\n[MANUAL]"; fi
 		#echo -e "db user [pass] [host]"
-		read -p "db user [pass] [host]" dbname_new dbuser_new dbpass_new dbhost_new
-		if [[ $verbose == 'true' ]]; then echo -e "You entered: \nDB: $dbname_new \nUser: $dbuser_new \nPass: $dbpass_new \nHost: $dbhost_new"; fi
+		echo -e "db user [pass] [host]"
+		read -p "" dbname_new dbuser_new dbpass_new dbhost_new
+		# if [[ $verbose == 'true' ]]; then echo -e "You entered: \nDB: $dbname_new \nUser: $dbuser_new \nPass: $dbpass_new \nHost: $dbhost_new"; fi
 
 		# if no dbpass was entered, set it to a random string
 		if [[ -z $dbpass_new ]]; then
-			if [[ $verbose == 'true' ]]; then echo "dbpass_new was empty, assigning a random value"; fi
+			if [[ $verbose == 'true' ]]; then echo "dbpass_new was empty, assigning a random value..."; fi
 			dbpass_new=$random_string
 		fi
 
 		# If the 4th argument isn't passed (dbhost_new), just set it to 'localhost'
 		if [[ -z $dbhost_new ]]; then
-			if [[ $verbose == 'true' ]]; then echo "dbhost_new was empty, setting as 'localhost'"; fi
+			if [[ $verbose == 'true' ]]; then echo "dbhost_new was empty, setting as 'localhost'..."; fi
 			dbhost_new='localhost'
 		fi
 
@@ -128,10 +129,11 @@ wpcfg() {
 		s|DB_HOST\(['\"]\),\s*\(['\"]\).*\?\2|DB_HOST\1, \2$safe_dbhost_new\2|" wp-config.php
 
 		# spit it out!
+		if [[ $dbhost_new == 'localhost' ]]; then dbhost_new=''; echo "omitting 'localhost' from output of new credentials..."; fi
 		echo -e "\nOLD:\n   $dbname_old $dbuser_old $dbpass_old $dbhost_old"
 		echo -e "\nNEW:\n   $dbname_new $dbuser_new $dbpass_new $dbhost_new"
 		echo -e "\n"
-		grep -i db wp-config.php
+
 	fi
 	
 
