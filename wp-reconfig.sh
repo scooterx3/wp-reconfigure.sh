@@ -50,7 +50,6 @@ wpcfg() {
 	random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
 	cpuser=`whoami`
 
-
 	if [[ $mode == 'manual' ]]; then
 #MANUAL
 		if [[ $verbose == 'true' ]]; then echo -e "\n[MANUAL]"; fi
@@ -74,33 +73,26 @@ wpcfg() {
 	else
 #AUTO
 		if [[ $verbose == 'true' ]]; then echo -e "\n[AUTO]"; fi
-		# this is auto mode
 
-		# fix dbname
-		# if cPanel user is the same, keep it otherwise prefix whatever is there with cpuser_
-		if [[ $dbname_old == $cpuser"_"* ]]; then
-			if [[ $verbose == 'true' ]]; then echo "cPanel user identical, keeping it for db name"; fi
-			dbname_new=$dbname_old
+		leftside=$cpuser"_"
+		leftside_length=${#leftside}
+
+	#DBNAME
+		dbname_rightside=${dbname_old#$leftside}
+		dbname_new=$leftside$dbname_rightside
+
+	#USERNAME	
+		
+		dbuser_rightside=${dbuser_old#$leftside}
+		if (( ${#dbuser_rightside} > 16-$leftside_length )); then
+			echo 'true'
+			dbuser_new=$leftside${dbuser_rightside:$leftside_length-16}
 		else
-			dbname_new=$cpuser"_"$dbname_old
+			echo 'false'
+			dbuser_new=$leftside$dbuser_rightside
 		fi
 
-		# fix username
-		# if cPanel user is the same, keep it otherwise prefix whatever is there with cpuser_
-		if [[ $dbuser_old == $cpuser"_"* ]]; then
-			if [[ $verbose == 'true' ]]; then echo "cPanel user identical, keeping it for db user"; fi
-			dbuser_new=$dbuser_old
-		else
-			dbuser_new=$cpuser"_"$dbuser_old
-		fi
-
-		# making sure new dbuser isn't too long
-		if (( ${#dbuser_new} > 16 )); then
-			if [[ $verbose == 'true' ]]; then echo "dbuser_new too long, truncating"; fi
-			dbuser_new=${dbuser_new:0:16}
-		fi
-
-
+	#PASSWORD
 		# pass is different, just keep it unless it's shorter than 5. If so, add a random 5 to the end of the string. 
 		if (( ${#dbpass_old} < 5 )); then 
 			if [[ $verbose == 'true' ]]; then echo "dbpass_old < 5 chars, adding random string: '$random_string'"; fi 
@@ -110,6 +102,7 @@ wpcfg() {
 			if [[ $verbose == 'true' ]]; then echo "dbpass_old >= 5 chars, keeping old password"; fi 
 			dbpass_new=$dbpass_old
 		fi
+	#HOST
 		# host will always be 'localhost'
 		dbhost_new='localhost'
 	fi
