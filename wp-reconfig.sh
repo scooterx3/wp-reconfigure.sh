@@ -9,13 +9,44 @@ wpcfg() {
 	
 	if [[ $1 == '-h' ]]; then
 		echo "Now vomiting helpful information..."
+
+		cat <<HERE
+		
+wpcfg (wp-reconfigure)
+
+Reconfigures the wp-config.php script so you don't have to! 
+
+Must be run from within the same directory as a wp-config.php file. 
+
+3 modes / flags: 
+  -a auto (default)
+  -m manual
+  -c current
+
+-a auto (default)
+
+	'wpcfg -a' or just 'wpcfg', since it defaults to auto. Then the script
+	spits out what the old credentials were and what the new credentials are. 
+
+
+-m manual
+
+	'wpcfg -m'. Then the user is prompted for at least a new database name
+	and user name. If no password is given, a new one is generated. If no
+	host is given, it defaults to 'localhost' 
+
+
+-c current
+
+	'wpcfg -c'. Then it spits out a single line of what the current credentials are in the
+	wp-config.php file.
+
+HERE
 		return
 	fi
 
-	# I want verbosity OFF and auto mode by default (even if no arguments are specified)
-	
-
-	unset dbhost_new dbname_new dbpass_new dbuser_new verbose
+	# I want auto mode by default (even if no arguments are specified)
+	unset dbhost_new dbname_new dbpass_new dbuser_new mode
 
 	while getopts ":amcvh" opt; do
 		case $opt in
@@ -25,8 +56,6 @@ wpcfg() {
 				mode='manual' ;;
 			c) 
 				mode='current' ;;
-			v)
-				verbose='true' ;;
 		esac
 	done
 	shift $((OPTIND-1))
@@ -52,27 +81,25 @@ wpcfg() {
 
 	if [[ $mode == 'manual' ]]; then
 #MANUAL
-		if [[ $verbose == 'true' ]]; then echo -e "\n[MANUAL]"; fi
-		#echo -e "db user [pass] [host]"
+		echo -e "\n[MANUAL]"
 		echo -e "db user [pass] [host]"
-		read -p "" dbname_new dbuser_new dbpass_new dbhost_new
-		# if [[ $verbose == 'true' ]]; then echo -e "You entered: \nDB: $dbname_new \nUser: $dbuser_new \nPass: $dbpass_new \nHost: $dbhost_new"; fi
+		read -p "> " dbname_new dbuser_new dbpass_new dbhost_new
 
 		# if no dbpass was entered, set it to a random string
 		if [[ -z $dbpass_new ]]; then
-			if [[ $verbose == 'true' ]]; then echo "dbpass_new was empty, assigning a random value..."; fi
+			echo "No password given, assigning a random value..."
 			dbpass_new=$random_string
 		fi
 
 		# If the 4th argument isn't passed (dbhost_new), just set it to 'localhost'
 		if [[ -z $dbhost_new ]]; then
-			if [[ $verbose == 'true' ]]; then echo "dbhost_new was empty, setting as 'localhost'..."; fi
+			echo "No host given, setting as 'localhost'..."
 			dbhost_new='localhost'
 		fi
 
 	else
 #AUTO
-		if [[ $verbose == 'true' ]]; then echo -e "\n[AUTO]"; fi
+		echo -e "\n[AUTO]"
 
 		leftside=$cpuser"_"
 		leftside_length=${#leftside}
@@ -85,21 +112,19 @@ wpcfg() {
 		
 		dbuser_rightside=${dbuser_old#$leftside}
 		if (( ${#dbuser_rightside} > 16-$leftside_length )); then
-			echo 'true'
 			dbuser_new=$leftside${dbuser_rightside:$leftside_length-16}
 		else
-			echo 'false'
 			dbuser_new=$leftside$dbuser_rightside
 		fi
 
 	#PASSWORD
 		# pass is different, just keep it unless it's shorter than 5. If so, add a random 5 to the end of the string. 
 		if (( ${#dbpass_old} < 5 )); then 
-			if [[ $verbose == 'true' ]]; then echo "dbpass_old < 5 chars, adding random string: '$random_string'"; fi 
+			echo "dbpass_old < 5 chars, adding random string: '$random_string'"
 			
 			dbpass_new=$dbpass_old$random_string #random_string defined at the top, I use it in more than 1 place
 		else 
-			if [[ $verbose == 'true' ]]; then echo "dbpass_old >= 5 chars, keeping old password"; fi 
+			echo "dbpass_old >= 5 chars, keeping old password"
 			dbpass_new=$dbpass_old
 		fi
 	#HOST
@@ -108,7 +133,7 @@ wpcfg() {
 	fi
 
 	if [[ -z $dbuser_new ]]; then
-		if [[ $verbose == 'true' ]]; then echo "dbuser_new was empty, exiting"; fi
+		echo "No dbuser given, exiting with no changes"
 	
 	else
 		# clean up right side for sed's use
