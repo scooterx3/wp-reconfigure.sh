@@ -76,14 +76,13 @@ HERE
 	dbname_old_temp=$dbname_old
 	dbuser_old_temp=$dbuser_old
 
-	random_name_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
-
 	if [[ $mode == 'current' ]]; then
 #CURRENT
 		echo "$dbname_old $dbuser_old $dbpass_old"
 		return
 	fi
 
+	random_name_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
 	random_pw_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
 	cpuser=`whoami`
 
@@ -115,7 +114,7 @@ HERE
 	#DBNAME
 		
 		# if it's a default value, set it to something random
-		if [[ $dbname_old == 'database_name_here' ]]; then
+		if [[ $dbname_old == 'database_name_here' || $dbname_old == '' ]]; then
 			dbname_old=$random_name_string
 		fi
 		dbname_rightside=${dbname_old#$leftside}
@@ -125,7 +124,7 @@ HERE
 	#USERNAME	
 		
 		# if it's a default value, set it to something random
-		if [[ $dbuser_old == 'username_here' ]]; then
+		if [[ $dbuser_old == 'username_here' || $dbuser_old == '' ]]; then
 			dbuser_old=$random_name_string
 		fi
 		dbuser_rightside=${dbuser_old#$leftside}
@@ -139,8 +138,9 @@ HERE
 	#PASSWORD
 
 		# if it's a default value, set it to something random
-		if [[ $dbpass_old == 'password_here' ]]; then 
+		if [[ $dbpass_old == 'password_here' || $dbpass_old == '' ]]; then 
 			echo "dbpass_old was default value, changing to random string: '$random_pw_string'"
+			dbpass_new=$random_pw_string
 		
 		# If it's too short, add some characters to the end
 		elif (( ${#dbpass_old} < 5 )); then 
