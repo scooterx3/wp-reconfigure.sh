@@ -78,7 +78,9 @@ HERE
 
 	if [[ $mode == 'current' ]]; then
 #CURRENT
-		echo "$dbname_old $dbuser_old $dbpass_old"
+		if [[ $dbhost_old == 'localhost' ]]; then $dbhost_old=''; fi
+
+		echo "$dbname_old $dbuser_old $dbpass_old $dbhost_old"
 		return
 	fi
 
