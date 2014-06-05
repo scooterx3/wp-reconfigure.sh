@@ -174,9 +174,9 @@ HERE
 		echo "No dbuser given, exiting with no changes"
 	
 	else
-		# clean up right side for sed's use
+		# clean up right side for sed's use (backslashes, ampersand, pipe)
 		for i in dbname_new dbuser_new dbpass_new dbhost_new; do
-			declare safe_$i=$(printf '%s' "${!i}" | sed -e 's|\\|\\\\|g; s|&|\\\&|g')
+			declare safe_$i=$(printf '%s' "${!i}" | sed -e 's|\\|\\\\|g; s|&|\\\&|g; s/|/\\\|/g')
 		done
 
 		sed -i -e "s|DB_NAME\(['\"]\),\s*\(['\"]\).*\?\2|DB_NAME\1, \2$safe_dbname_new\2|
