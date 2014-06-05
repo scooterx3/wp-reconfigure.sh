@@ -75,7 +75,7 @@ HERE
 	# Catch circumstances in which one of the _old variables is empty, and abort.
 	if [[ -z $dbuser_old ]]; then
 		echo -e "Empty variable detected, aborting! Hopefully this helps:\n"
-		egrep "^[^/].*['\"]DB_(NAME|USER|PASSWORD|HOST[^_])" wp-config.php | grep [\'\"][\'\"]
+		egrep "^[^/].*['\"]DB_(NAME|USER|PASSWORD|HOST[^_])" wp-config.php | egrep "['\"]{2}"
 		return
 	fi
 
@@ -86,7 +86,7 @@ HERE
 
 	if [[ $mode == 'current' ]]; then
 #CURRENT
-		if [[ $dbhost_old == 'localhost' ]]; then $dbhost_old=''; fi
+		if [[ $dbhost_old == 'localhost' ]]; then dbhost_old=''; fi
 
 		echo "$dbname_old $dbuser_old $dbpass_old $dbhost_old"
 		return
@@ -179,10 +179,10 @@ HERE
 			declare safe_$i=$(printf '%s' "${!i}" | sed -e 's|\\|\\\\|g; s|&|\\\&|g; s/|/\\\|/g')
 		done
 
-		sed -i -e "s|DB_NAME\(['\"]\),\s*\(['\"]\).*\?\2|DB_NAME\1, \2$safe_dbname_new\2|
-		s|DB_USER\(['\"]\),\s*\(['\"]\).*\?\2|DB_USER\1, \2$safe_dbuser_new\2|
-		s|DB_PASSWORD\(['\"]\),\s*\(['\"]\).*\?\2|DB_PASSWORD\1, \2$safe_dbpass_new\2|
-		s|DB_HOST\(['\"]\),\s*\(['\"]\).*\?\2|DB_HOST\1, \2$safe_dbhost_new\2|" wp-config.php
+		sed -i -e "s|DB_NAME\(['\"]\),\s*\(['\"]\).*\?\2\s*)|DB_NAME\1, \2$safe_dbname_new\2)|
+		s|DB_USER\(['\"]\),\s*\(['\"]\).*\?\2\s*)|DB_USER\1, \2$safe_dbuser_new\2)|
+		s|DB_PASSWORD\(['\"]\),\s*\(['\"]\).*\?\2\s*)|DB_PASSWORD\1, \2$safe_dbpass_new\2)|
+		s|DB_HOST\(['\"]\),\s*\(['\"]\).*\?\2\s*)|DB_HOST\1, \2$safe_dbhost_new\2)|" wp-config.php
 
 		# Set these values back to what the temp ones were. This shouldn't change anything except if the old values were default 'username_here' ones. 
 		dbname_old=$dbname_old_temp
