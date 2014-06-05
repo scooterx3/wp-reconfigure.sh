@@ -71,7 +71,15 @@ HERE
 
 	cp -n wp-config.php $backupfile
 	read -r dbhost_old dbname_old dbpass_old dbuser_old <<< $( egrep "^[^/].*['\"]DB_(NAME|USER|PASSWORD|HOST[^_])" wp-config.php | sort -d | sed "s/.*[\"']\(.*\)[\"'].*;.*/\1/" )
-	
+
+	# Catch circumstances in which one of the _old variables is empty, and abort.
+	if [[ -z $dbuser_old ]]; then
+		echo -e "Empty variable detected, aborting! Hopefully this helps:\n"
+		egrep "^[^/].*['\"]DB_(NAME|USER|PASSWORD|HOST[^_])" wp-config.php | grep [\'\"][\'\"]
+		return
+	fi
+
+
 	# setting them to temp variables in case I run into default values down the road
 	dbname_old_temp=$dbname_old
 	dbuser_old_temp=$dbuser_old
