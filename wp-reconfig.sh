@@ -145,13 +145,13 @@ HERE
 			dbpass_new=$random_pw_string
 		
 		# If it's too short, add some characters to the end
-		elif (( ${#dbpass_old} < 5 )); then 
-			echo "dbpass_old < 5 chars, adding random string: '$random_pw_string'"
+		elif (( ${#dbpass_old} < 6 )); then 
+			echo "dbpass_old < 6 chars, adding random string: '$random_pw_string'"
 			dbpass_new=$dbpass_old$random_pw_string #random_pw_string defined at the top, I use it in more than 1 place
 		
 		# otherwise, keep it
 		else 
-			echo "dbpass_old >= 5 chars, keeping old password"
+			echo "dbpass_old >= 6 chars, keeping old password"
 			dbpass_new=$dbpass_old
 		fi
 	
