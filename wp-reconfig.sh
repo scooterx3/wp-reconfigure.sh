@@ -93,7 +93,7 @@ HERE
 	fi
 
 	random_name_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
-	random_pw_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
+	random_pw_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 6 | head -n 1)
 	cpuser=`whoami`
 
 	if [[ $mode == 'manual' ]]; then
